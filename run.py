@@ -2,9 +2,10 @@ import torch
 import numpy as np
 import cv2, glob
 
-from calibrate import load_calibration, undistort
+from calibrate import load_calibration, stereo_undistort
 from train import get_model_object_detection
 from test import draw_detection, get_good_detections
+from depth import calculate_disparity, depth_heatmap
 
 # Set the device we will be using to run the model
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -30,11 +31,11 @@ def main():
     model.to(DEVICE)
 
     # Loading Image Paths
-    img_l_paths = sorted(glob.glob('data/Stereo_conveyor_without_occlusions/right/*'))
+    img_l_paths = sorted(glob.glob('data/Stereo_conveyor_without_occlusions/left/*'))
     img_r_paths = sorted(glob.glob('data/Stereo_conveyor_without_occlusions/right/*'))
 
     # Loading Undistortion parameters
-    K_l, D_l, K_r, D_r = load_calibration('data/calibration.pkl')
+    calibration = load_calibration('data/calibration.pkl')
 
     for l_path, r_path in zip(img_l_paths, img_r_paths):
         # Loading Images
@@ -42,14 +43,16 @@ def main():
         orig_r = cv2.imread(r_path)
 
         # Undistort Images
-        orig_l = undistort(orig_l, K_l, D_l)
-        orig_r = undistort(orig_r, K_r, D_r)
+        orig_l, orig_r = stereo_undistort(orig_l, orig_r, calibration)
+
+        # Depth Estimation
+        disparity = calculate_disparity(orig_l, orig_r)
+        depth_map = cv2.reprojectImageTo3D(disparity, calibration['dispartityToDepthMap'])[:, :, 2] 
+        depth_map_show = depth_heatmap(depth_map, 5)
 
         # Image to pytorch format
         image = opencv2torch(orig_l)
         image = image.to(DEVICE)
-
-        # TODO: Depth Estimation
 
         # Detect objects
         detections = model(image)[0]
@@ -60,9 +63,10 @@ def main():
 
         # TODO: Kalman Filter
 
-        # Show
-        cv2.imshow("Output_l", result)
-        cv2.imshow("Output_r", orig_r)
+        # Showq
+        cv2.imshow("Detection Result", result)
+        cv2.imshow("Depth Map", depth_map_show)
+
         key = cv2.waitKey(1)
         if key == 27 or key == ord('q'):
             break

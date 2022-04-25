@@ -1,11 +1,10 @@
-from unicodedata import name
 import torch
 from torch.utils.data import DataLoader
 import torchvision
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 
 import utils.transforms as T
-from utils.engine import train_one_epoch, evaluate
+from utils.engine import train_one_epoch
 from utils.utils import collate_fn
 
 from dataset import PerceptionDataset
