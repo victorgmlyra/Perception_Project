@@ -1,4 +1,5 @@
 import os, json
+from sklearn import datasets
 import torch
 from PIL import Image
 import numpy as np

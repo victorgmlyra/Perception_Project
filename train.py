@@ -28,8 +28,8 @@ def get_transform(train):
 
 def get_model_object_detection(num_classes, load_default=True):
     # load a model pre-trained on COCO
-    # model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=load_default)
-    model = torchvision.models.detection.fasterrcnn_mobilenet_v3_large_fpn(pretrained=load_default)
+    #model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=load_default)
+    model = torchvision.models.detection.fasterrcnn_mobilenet_v3_large_320_fpn(pretrained=load_default)
 
     # get number of input features for the classifier
     in_features = model.roi_heads.box_predictor.cls_score.in_features

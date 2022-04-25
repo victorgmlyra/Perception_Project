@@ -1,6 +1,6 @@
 import json
 
-name = 'test'
+name = 'train'
 
 f = open('data/dataset/' + name + '.json')
 data = json.load(f)
