@@ -59,3 +59,8 @@ class PerceptionDataset(torch.utils.data.Dataset):
     def __len__(self):
         return len(self.imgs)
 
+
+
+if __name__ == "__main__":
+    dataset = PerceptionDataset('data/dataset', None)
+    print(dataset[0])

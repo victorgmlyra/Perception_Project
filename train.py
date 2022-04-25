@@ -28,7 +28,8 @@ def get_transform(train):
 
 def get_model_object_detection(num_classes, load_default=True):
     # load a model pre-trained on COCO
-    model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=load_default)
+    # model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=load_default)
+    model = torchvision.models.detection.fasterrcnn_mobilenet_v3_large_fpn(pretrained=load_default)
 
     # get number of input features for the classifier
     in_features = model.roi_heads.box_predictor.cls_score.in_features
@@ -55,7 +56,7 @@ def main():
 
     # define training and validation data loaders
     data_loader = DataLoader(
-        dataset, batch_size=1, shuffle=True, num_workers=4,
+        dataset, batch_size=4, shuffle=True, num_workers=4,
         collate_fn=collate_fn)
 
     data_loader_test = DataLoader(
@@ -78,7 +79,7 @@ def main():
                                                    gamma=0.1)
 
     # let's train it for 10 epochs
-    num_epochs = 15
+    num_epochs = 100
 
     for epoch in range(num_epochs):
         # train for one epoch, printing every 10 iterations
