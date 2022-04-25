@@ -1,6 +1,8 @@
 # Custom 
 data/*
-
+!data/models
+data/models/*
+!data/models/.gitkeep
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
