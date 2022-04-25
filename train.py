@@ -8,10 +8,8 @@ import utils.transforms as T
 from utils.engine import train_one_epoch, evaluate
 from utils.utils import collate_fn
 
-import numpy as np
-import cv2
-
 from dataset import PerceptionDataset
+from json_transform import json_transform
 
 
 def get_transform(train):
@@ -40,6 +38,9 @@ def get_model_object_detection(num_classes, load_default=True):
 
 
 def main():
+    # Transform JSON
+    json_transform('train')
+
     # train on the GPU or on the CPU, if a GPU is not available
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
@@ -59,9 +60,9 @@ def main():
         dataset, batch_size=4, shuffle=True, num_workers=4,
         collate_fn=collate_fn)
 
-    data_loader_test = DataLoader(
-        dataset_test, batch_size=1, shuffle=False, num_workers=4,
-        collate_fn=collate_fn)
+    # data_loader_test = DataLoader(
+    #     dataset_test, batch_size=1, shuffle=False, num_workers=4,
+    #     collate_fn=collate_fn)
 
     # get the model using our helper function
     model = get_model_object_detection(num_classes)
@@ -79,7 +80,7 @@ def main():
                                                    gamma=0.1)
 
     # let's train it for 10 epochs
-    num_epochs = 100
+    num_epochs = 30
 
     for epoch in range(num_epochs):
         # train for one epoch, printing every 10 iterations
