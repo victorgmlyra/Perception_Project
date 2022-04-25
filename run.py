@@ -23,7 +23,7 @@ def main():
     model.to(DEVICE)
     
 
-    img_path = 'data/Stereo_conveyor_without_occlusions/left/1585434317_672791958_Left.png'
+    img_path = 'data/Stereo_conveyor_without_occlusions/left/1585434286_575831890_Left.png'
     image = cv2.imread(img_path)
     orig = image.copy()
 

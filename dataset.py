@@ -1,4 +1,5 @@
 import os, json
+from sklearn import datasets
 import torch
 from PIL import Image
 import numpy as np
@@ -59,3 +60,8 @@ class PerceptionDataset(torch.utils.data.Dataset):
     def __len__(self):
         return len(self.imgs)
 
+
+
+if __name__ == '__main__':
+    dataset = PerceptionDataset("data/dataset", None)
+    print(dataset[0])
