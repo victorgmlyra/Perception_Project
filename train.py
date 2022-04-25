@@ -50,19 +50,10 @@ def main():
     dataset = PerceptionDataset('data/dataset', get_transform(train=True))
     dataset_test = PerceptionDataset('data/dataset', get_transform(train=False))
 
-    # split the dataset in train and test set
-    # indices = torch.randperm(len(dataset)).tolist()
-    # dataset = torch.utils.data.Subset(dataset, indices[:-10])
-    # dataset_test = torch.utils.data.Subset(dataset_test, indices[-10:])
-
     # define training and validation data loaders
     data_loader = DataLoader(
         dataset, batch_size=4, shuffle=True, num_workers=4,
         collate_fn=collate_fn)
-
-    # data_loader_test = DataLoader(
-    #     dataset_test, batch_size=1, shuffle=False, num_workers=4,
-    #     collate_fn=collate_fn)
 
     # get the model using our helper function
     model = get_model_object_detection(num_classes)
@@ -87,8 +78,6 @@ def main():
         train_one_epoch(model, optimizer, data_loader, device, epoch, print_freq=10)
         # update the learning rate
         lr_scheduler.step()
-        # evaluate on the test dataset
-        # evaluate(model, data_loader_test, device=device)
 
     torch.save(model.state_dict(), 'data/models/model_weights.pth')
     print("That's it!")

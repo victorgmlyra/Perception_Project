@@ -7,8 +7,12 @@ from torchvision.transforms import functional as F
 from torchvision.transforms import transforms as T, InterpolationMode
 
 def get_dimensions(image_tensor):
-    w, h = F._get_image_size(image_tensor)
-    c = F._get_image_num_channels(image_tensor)
+    try:
+        w, h = F.get_image_size(image_tensor)
+        c = F.get_image_num_channels(image_tensor)
+    except:
+        w, h = F._get_image_size(image_tensor)
+        c = F._get_image_num_channels(image_tensor)
     return c, h, w
 
 
