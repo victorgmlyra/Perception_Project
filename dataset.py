@@ -1,7 +1,9 @@
 import os, json
-from sklearn import datasets
 import torch
 from PIL import Image
+import utils.transforms as T
+from torchvision.transforms import ToPILImage
+
 import numpy as np
 
 import cv2
@@ -61,7 +63,44 @@ class PerceptionDataset(torch.utils.data.Dataset):
         return len(self.imgs)
 
 
+#  Transform function
+def get_transform(train):
+    transforms = []
+    transforms.append(T.PILToTensor())
+    if train:
+        transforms.append(T.RandomHorizontalFlip(0.5))
+        transforms.append(T.RandomZoomOut())
+        transforms.append(T.ScaleJitter((800, 800)))
+
+        
+    return T.Compose(transforms)
+
 
 if __name__ == "__main__":
-    dataset = PerceptionDataset('data/dataset', None)
-    print(dataset[0])
+    dataset = PerceptionDataset('data/dataset', get_transform(True))
+
+    CLASSES = {1:'Books', 2:'Box', 3:'Mugs'}
+    COLORS = np.random.uniform(0, 255, size=(len(CLASSES)+1, 3))
+
+    for tensor, boxes in dataset:
+        img = tensor.detach().cpu()
+        img = np.array(ToPILImage()(img))
+        img = img.astype(np.uint8)
+        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+
+        for idx in range(len(boxes['boxes'].numpy())):
+            box = boxes['boxes'].numpy()[idx, :].astype("int")
+            l = boxes['labels'].numpy()[idx]
+            label = "{}".format(CLASSES[l])
+            (startX, startY, endX, endY) = box
+            cv2.rectangle(img, (startX, startY), (endX, endY),
+                COLORS[l], 5)
+            y = startY - 15 if startY - 15 > 15 else startY + 15
+            cv2.putText(img, label, (startX, y),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.7, COLORS[l], 2)
+            
+
+        cv2.imshow('a', img)
+        key = cv2.waitKey(1000)
+        if key == 27 or key == ord('q'):
+            break

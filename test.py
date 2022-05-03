@@ -13,7 +13,7 @@ from json_transform import json_transform
 
 # set the device we will be using to run the model
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-CLASSES = {1:'Books', 2:'Box', 3:'Mugs'}
+CLASSES = {0:'NULL', 1:'Books', 2:'Box', 3:'Mugs'}
 COLORS = np.random.uniform(0, 255, size=(len(CLASSES)+1, 3))
 
 def get_good_detections(detections, min_confidence=0.6):
@@ -24,7 +24,7 @@ def get_good_detections(detections, min_confidence=0.6):
         if confidence > min_confidence:
             idx = int(detections["labels"][i])
             box = detections["boxes"][i].detach().cpu().numpy()
-            good_detections.append((idx, confidence, box.astype("int")))
+            good_detections.append((idx, confidence.detach().cpu().numpy(), box.astype("int")))
 
     return good_detections
 
@@ -40,7 +40,7 @@ def draw_detection(img, good_detections, loader_img=False):
     for detection in good_detections:
         idx, confidence, box = detection
         label = "{}: {:.2f}%".format(CLASSES[idx], confidence * 100)
-        print("[INFO] {}".format(label))
+        # print("[INFO] {}".format(label))
         # draw the bounding box and label on the image
         (startX, startY, endX, endY) = box
         cv2.rectangle(draw_img, (startX, startY), (endX, endY),

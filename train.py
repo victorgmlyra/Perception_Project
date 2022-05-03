@@ -3,24 +3,11 @@ from torch.utils.data import DataLoader
 import torchvision
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 
-import utils.transforms as T
 from utils.engine import train_one_epoch
 from utils.utils import collate_fn
 
-from dataset import PerceptionDataset
+from dataset import PerceptionDataset, get_transform
 from json_transform import json_transform
-
-
-def get_transform(train):
-    transforms = []
-    transforms.append(T.PILToTensor())
-    if train:
-        transforms.append(T.RandomHorizontalFlip(0.5))
-        transforms.append(T.RandomZoomOut())
-        transforms.append(T.ScaleJitter((800, 800)))
-
-        
-    return T.Compose(transforms)
 
 
 def get_model_object_detection(num_classes, load_default=True):
@@ -47,7 +34,6 @@ def main():
     num_classes = 4
     # use our dataset and defined transformations
     dataset = PerceptionDataset('data/dataset', get_transform(train=True))
-    dataset_test = PerceptionDataset('data/dataset', get_transform(train=False))
 
     # define training and validation data loaders
     data_loader = DataLoader(
