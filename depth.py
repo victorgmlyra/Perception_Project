@@ -16,7 +16,7 @@ speckleWindowSize = 22
 disp12MaxDiff = 5
 minDisparity = 7
 
-def calculate_disparity(img_l, img_r, red=1):
+def calculate_disparity(img_l, img_r):
     Left_nice = cv2.cvtColor(img_l,cv2.COLOR_BGR2GRAY)
     Right_nice = cv2.cvtColor(img_r,cv2.COLOR_BGR2GRAY)
 

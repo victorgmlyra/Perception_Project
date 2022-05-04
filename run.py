@@ -42,7 +42,7 @@ def main():
     calibration = load_calibration('data/calibration.pkl')
 
     l_first, r_first = None, None
-    video_out = cv2.VideoWriter('project.avi', cv2.VideoWriter_fourcc(*'DIVX'), 30, (1280,720))
+    video_out = cv2.VideoWriter('project.mp4', cv2.VideoWriter_fourcc(*'MP4V'), 30, (1280,720))
     for i, (l_path, r_path) in enumerate(zip(img_l_paths, img_r_paths)):
 
         # Loading Images

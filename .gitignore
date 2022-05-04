@@ -9,6 +9,7 @@ data/dataset/*
 !data/dataset/.gitkeep
 
 *.avi
+*.mp4
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
