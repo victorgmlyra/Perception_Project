@@ -1,106 +1,94 @@
-import os, json
+import copy
 import torch
-from PIL import Image
-import utils.transforms as T
-from torchvision.transforms import ToPILImage
 
+import albumentations as A
+from albumentations.pytorch import ToTensorV2
 import numpy as np
 
-import cv2
-
+import cv2, glob
 
 class PerceptionDataset(torch.utils.data.Dataset):
-    def __init__(self, root, transforms, json_name = 'train_torch.json'):
+    def __init__(self, root, transforms, train = False):
         self.root = root
-        self.transforms = transforms
+        self.transform = transforms
+
+        self.class_to_idx = {'Random':0, 'Book':1, 'Box':2, 'Mug':3}
+        self.idx_to_class = {value:key for key,value in self.class_to_idx.items()}
+
         # load all image files, sorting them to
         # ensure that they are aligned
-        f = open(os.path.join(root, json_name))
-        self.labels_dict = json.load(f)
+        if train:
+            path = root + '/train'
+        else:
+            path = root + '/test'
 
-        self.imgs = list(self.labels_dict.keys())
-
-        f.close()
-
-        self.encoding = {'Books':1, 'Box':2, 'Mugs':3}
+        self.img_paths = glob.glob(path + '/*/*')
         
 
     def __getitem__(self, idx):
         # load images and masks
-        name = self.imgs[idx]
-        img_path = os.path.join(self.root, name)
+        name = self.img_paths[idx]
 
-        img = Image.open(img_path).convert("RGB")
+        image = cv2.imread(name)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-        # get bounding box coordinates for each image
-        boxes = self.labels_dict[name]['rects']
-        labels = [self.encoding[l] for l in self.labels_dict[name]['labels']]
+        label = name.split('/')[-2]
+        label = self.class_to_idx[label]
 
-        num_objs = len(labels)
-        # convert everything into a torch.Tensor
-        boxes = torch.as_tensor(boxes, dtype=torch.float32)
-        # there is only one class
-        labels = torch.as_tensor(labels, dtype=torch.int64)
+        if self.transform is not None:
+            img = self.transform(image=image)["image"]
 
-        image_id = torch.tensor([idx])
-        area = (boxes[:, 3] - boxes[:, 1]) * (boxes[:, 2] - boxes[:, 0])
-        # suppose all instances are not crowd
-        iscrowd = torch.zeros((num_objs,), dtype=torch.int64)
-
-        target = {}
-        target["boxes"] = boxes
-        target["labels"] = labels
-        target["image_id"] = image_id
-        target["area"] = area
-        target["iscrowd"] = iscrowd
-
-        if self.transforms is not None:
-            img, target = self.transforms(img, target)
-
-        return img, target
+        return img, label
 
     def __len__(self):
-        return len(self.imgs)
+        return len(self.img_paths)
 
 
-#  Transform function
-def get_transform(train):
-    transforms = []
-    transforms.append(T.PILToTensor())
-    if train:
-        transforms.append(T.RandomHorizontalFlip(0.5))
-        transforms.append(T.RandomZoomOut())
-        transforms.append(T.ScaleJitter((800, 800)))
+train_transforms = A.Compose(
+    [
+        A.SmallestMaxSize(max_size=300),
+        A.ShiftScaleRotate(shift_limit=0.05, scale_limit=0.05, rotate_limit=360, p=0.5),
+        A.RandomCrop(height=224, width=224),
+        A.RGBShift(r_shift_limit=15, g_shift_limit=15, b_shift_limit=15, p=0.5),
+        A.RandomBrightnessContrast(p=0.5),
+        A.MultiplicativeNoise(multiplier=[0.5,2], per_channel=True, p=0.2),
+        A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        A.HueSaturationValue(hue_shift_limit=0.2, sat_shift_limit=0.2, val_shift_limit=0.2, p=0.5),
+        A.RandomBrightnessContrast(brightness_limit=(-0.1,0.1), contrast_limit=(-0.1, 0.1), p=0.5),
+        ToTensorV2(),
+    ]
+)
 
+test_transforms = A.Compose(
+    [
+        A.SmallestMaxSize(max_size=257),
+        A.CenterCrop(height=224, width=224),
+        A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ToTensorV2(),
+    ]
+)
+
+def visualize_augmentations(dataset, idx=0, samples=10, cols=5, random_img = False):
+    dataset = copy.deepcopy(dataset)
+    #we remove the normalize and tensor conversion from our augmentation pipeline
+    dataset.transform = A.Compose([t for t in dataset.transform if not isinstance(t, (A.Normalize, ToTensorV2))])
+    rows = samples // cols
         
-    return T.Compose(transforms)
+    figure, ax = plt.subplots(nrows=rows, ncols=cols, figsize=(12, 8))
+    for i in range(samples):
+        if random_img:
+            idx = np.random.randint(1,len(dataset))
+        image, lab = dataset[idx]
+        ax.ravel()[i].imshow(image)
+        ax.ravel()[i].set_axis_off()
+        ax.ravel()[i].set_title(dataset.idx_to_class[lab])
+    plt.tight_layout(pad=1)
+    plt.show()    
 
 
 if __name__ == "__main__":
-    dataset = PerceptionDataset('data/dataset', get_transform(True))
+    import matplotlib.pyplot as plt
 
-    CLASSES = {1:'Books', 2:'Box', 3:'Mugs'}
-    COLORS = np.random.uniform(0, 255, size=(len(CLASSES)+1, 3))
+    dataset = PerceptionDataset('data/dataset', train_transforms, train=True)
 
-    for tensor, boxes in dataset:
-        img = tensor.detach().cpu()
-        img = np.array(ToPILImage()(img))
-        img = img.astype(np.uint8)
-        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-
-        for idx in range(len(boxes['boxes'].numpy())):
-            box = boxes['boxes'].numpy()[idx, :].astype("int")
-            l = boxes['labels'].numpy()[idx]
-            label = "{}".format(CLASSES[l])
-            (startX, startY, endX, endY) = box
-            cv2.rectangle(img, (startX, startY), (endX, endY),
-                COLORS[l], 5)
-            y = startY - 15 if startY - 15 > 15 else startY + 15
-            cv2.putText(img, label, (startX, y),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.7, COLORS[l], 2)
-            
-
-        cv2.imshow('a', img)
-        key = cv2.waitKey(1000)
-        if key == 27 or key == ord('q'):
-            break
+    visualize_augmentations(dataset,np.random.randint(1,len(dataset)), random_img = True)

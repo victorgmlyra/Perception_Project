@@ -5,19 +5,18 @@ import matplotlib.pyplot as plt
 from calibrate import *
 
 numDisparities = 160
-blockSize = 17
+blockSize = 15
 preFilterType = 0
-preFilterSize = 19
-preFilterCap = 26
-textureThreshold = 11
-uniquenessRatio = 16
-speckleRange = 16
-speckleWindowSize = 26
-disp12MaxDiff = 2
-minDisparity = 2
+preFilterSize = 9
+preFilterCap = 20
+textureThreshold = 17
+uniquenessRatio = 32
+speckleRange = 21
+speckleWindowSize = 22
+disp12MaxDiff = 5
+minDisparity = 7
 
-
-def calculate_disparity(img_l, img_r):
+def calculate_disparity(img_l, img_r, red=1):
     Left_nice = cv2.cvtColor(img_l,cv2.COLOR_BGR2GRAY)
     Right_nice = cv2.cvtColor(img_r,cv2.COLOR_BGR2GRAY)
 
@@ -40,7 +39,6 @@ def calculate_disparity(img_l, img_r):
     # Calculating disparity
     disparity = stereo.compute(Left_nice,Right_nice)
     disparity = disparity.astype(np.float32)
-    # disparity = (disparity/16.0 - minDisparity)/numDisparities
 
     return disparity
 
