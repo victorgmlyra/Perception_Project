@@ -3,7 +3,7 @@ import cv2
 
 from dataset import test_transforms
 
-def find_object(new_img, old_img, thresh = 90, window_size = 15):
+def find_object(new_img, old_img, thresh = 70, window_size = 11):
     # Blur
     blur_img = cv2.GaussianBlur(new_img, (window_size, window_size), 0)
 
@@ -12,15 +12,18 @@ def find_object(new_img, old_img, thresh = 90, window_size = 15):
     dif = np.sum(dif, axis=2, dtype=int)
     dif = np.where((dif > thresh), 255, 0).astype(np.uint8)
 
+    # ROI
+    dif[:, :370] = 0
+    dif[:, 1230:] = 0
+    dif[660:, :] = 0
+    dif[420:500, 1015:1100] = 0
+    dif[390:450, 1140:1200] = 0
+
     # Filter threshold
     kernel = np.ones((window_size, window_size), np.uint8)
-    img_thresh = cv2.erode(dif, kernel, iterations=2)
-    img_thresh = cv2.dilate(img_thresh, kernel, iterations=6)
-
-    # ROI
-    img_thresh[:, :370] = 0
-    img_thresh[:, 1230:] = 0
-    img_thresh[660:, :] = 0
+    img_thresh = cv2.erode(dif, kernel, iterations=1)
+    img_thresh = cv2.dilate(img_thresh, kernel, iterations=4)
+    # img_thresh = cv2.erode(dif, kernel, iterations=1)
 
     # Find contours
     contours, hierarchy = cv2.findContours(image=img_thresh, mode=cv2.RETR_TREE, method=cv2.CHAIN_APPROX_NONE)
@@ -32,7 +35,7 @@ def find_object(new_img, old_img, thresh = 90, window_size = 15):
         if area > 5000:
             rects.append((0, 0, (rect[0], rect[1], rect[0] + rect[2], rect[1] + rect[3])))
 
-    return rects
+    return rects, dif
 
 
 def softmax(x):

@@ -61,7 +61,7 @@ def main():
         depth_map_show = depth_heatmap(depth_map, 5)
 
         # Object Detection (Image Processing)
-        good_detections = find_object(orig_l, l_first)
+        good_detections, img_t = find_object(orig_l, l_first)
 
         # Image Classification (DeepLearning)
         good_detections = classify(orig_l, good_detections, model, DEVICE)
@@ -74,7 +74,7 @@ def main():
         # Show
         cv2.imshow("Detection Result", result)
         video_out.write(result)
-        cv2.imshow("Depth Map", depth_map_show)
+        cv2.imshow("Depth Map", img_t)
 
         key = cv2.waitKey(1)
         if key == 27 or key == ord('q'):
