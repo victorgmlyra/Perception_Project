@@ -27,8 +27,8 @@ Project for the course **31392 Perception for autonomous systems**
 
 ### Data
 
-- To run without training, download the pre-trained model [here](https://drive.google.com/file/d/14nawkTuSKbHg8cQjECSEd4TzFL9oiIKE/view?usp=sharing) and add it inside the models folder. 
-- To train a new model, download the training data [here]() (Add link) and add it inside the dataset folder.
+- To run without training, download the pre-trained model [here](https://drive.google.com/file/d/15pqvgD2hQbPn16eabIEY3EN6aEiRiSmT/view?usp=sharing) and add it inside the models folder. 
+- To train a new model, download the training data [here](https://drive.google.com/file/d/1D0SWy6GJX9jDJNu1pgumCChnPK7YuG4D/view?usp=sharing) and add it inside the dataset folder.
 - Download the [calibration data](https://dtudk-my.sharepoint.com/personal/evanb_dtu_dk/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fevanb%5Fdtu%5Fdk%2FDocuments%2FCourses%2F31392%2FFinal%5FProject%2FStereo%5Fcalibration%5Fimages%2Erar&parent=%2Fpersonal%2Fevanb%5Fdtu%5Fdk%2FDocuments%2FCourses%2F31392%2FFinal%5FProject&ga=1), [data w/o occlusion](https://dtudk-my.sharepoint.com/personal/evanb_dtu_dk/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fevanb%5Fdtu%5Fdk%2FDocuments%2FCourses%2F31392%2FFinal%5FProject%2FStereo%5Fconveyor%5Fwithout%5Focclusions%2Erar&parent=%2Fpersonal%2Fevanb%5Fdtu%5Fdk%2FDocuments%2FCourses%2F31392%2FFinal%5FProject&ga=1), and [data with occlusion](https://dtudk-my.sharepoint.com/personal/evanb_dtu_dk/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fevanb%5Fdtu%5Fdk%2FDocuments%2FCourses%2F31392%2FFinal%5FProject%2FStereo%5Fconveyor%5Fwith%5Focclusions%2Erar&parent=%2Fpersonal%2Fevanb%5Fdtu%5Fdk%2FDocuments%2FCourses%2F31392%2FFinal%5FProject&ga=1).
 - The data folder should look like this:
     ```

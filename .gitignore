@@ -8,6 +8,8 @@ data/models/*
 data/dataset/*
 !data/dataset/.gitkeep
 
+*.avi
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -137,3 +139,5 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+.idea/workspace.xml
+video_out
