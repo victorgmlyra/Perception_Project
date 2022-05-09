@@ -1,3 +1,4 @@
+from cv2 import edgePreservingFilter
 import torch
 import numpy as np
 import cv2
@@ -9,7 +10,8 @@ from dataset import PerceptionDataset, test_transforms
 from train import get_model_object_detection
 
 import matplotlib.pyplot as plt
-
+from sklearn.metrics import confusion_matrix
+import seaborn as sns
 
 CLASSES = {0:'Random', 1:'Book', 2:'Box', 3:'Mug'}
 COLORS = np.random.uniform(0, 255, size=(len(CLASSES)+1, 3))
@@ -40,7 +42,7 @@ return_transform = transforms.Compose(
 )
 
 def draw_detection(img, good_detections, loader_img=False):
-    draw_img = img.copy() 
+    draw_img = img.copy()
     # loop over the detections
     for detection in good_detections:
         idx, confidence, box = detection
@@ -73,6 +75,7 @@ def main():
     rows = samples // 8
         
     figure, ax = plt.subplots(nrows=rows, ncols=8, figsize=(24, 16))
+    y_test, y_pred = [], []
     for i, (img, label) in enumerate(data_loader_test):
         output = model(img)
         index = output.data.cpu().numpy().argmax()
@@ -83,7 +86,26 @@ def main():
         ax.ravel()[i].set_axis_off()
         ax.ravel()[i].set_title(dataset_test.idx_to_class[index])
 
+        y_test.append(label.numpy()[0])
+        y_pred.append(index)
+
     plt.tight_layout(pad=1)
+    figure.delaxes(ax[3][7])
+
+    # Confussion Matrix
+    cf_matrix = confusion_matrix(y_test, y_pred)
+    plt.figure(2)
+    ax2 = sns.heatmap(cf_matrix, annot=True, cmap='Blues')
+
+    ax2.set_title('Confusion Matrix \n')
+    ax2.set_xlabel('Predicted Values')
+    ax2.set_ylabel('Actual Values ')
+
+    ## Ticket labels - List must be in alphabetical order
+    ax2.xaxis.set_ticklabels(dataset_test.idx_to_class.values())
+    ax2.yaxis.set_ticklabels(dataset_test.idx_to_class.values())
+
+    # Show plots
     plt.show()  
 
 if __name__ == "__main__":
